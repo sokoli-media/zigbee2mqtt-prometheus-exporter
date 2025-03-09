@@ -17,6 +17,7 @@ var powerMeterCurrentMetric = promauto.NewGaugeVec(prometheus.GaugeOpts{Name: "z
 var powerMeterEnergyMetric = promauto.NewGaugeVec(prometheus.GaugeOpts{Name: "zigbee_power_meter_energy_total"}, labels)
 var powerMeterPowerMetric = promauto.NewGaugeVec(prometheus.GaugeOpts{Name: "zigbee_power_meter_power"}, labels)
 var powerMeterVoltageMetric = promauto.NewGaugeVec(prometheus.GaugeOpts{Name: "zigbee_power_meter_voltage"}, labels)
+var deviceLastUpdateMetrics = promauto.NewGaugeVec(prometheus.GaugeOpts{Name: "zigbee_power_meter_last_update"}, labels)
 
 var lastUpdateMetric = promauto.NewGauge(prometheus.GaugeOpts{Name: "zigbee_last_update"})
 var unknownTopicMetric = promauto.NewCounterVec(prometheus.CounterOpts{Name: "zigbee_unknown_topic"}, []string{"topic"})
@@ -40,6 +41,7 @@ func tryLoadingDeviceMetrics(logger *slog.Logger, deviceName string, payload str
 		powerMeterEnergyMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Energy)
 		powerMeterPowerMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Power)
 		powerMeterVoltageMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Voltage)
+		deviceLastUpdateMetrics.With(metricLabels).SetToCurrentTime()
 		return
 	}
 
