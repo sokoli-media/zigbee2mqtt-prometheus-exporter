@@ -31,3 +31,16 @@ func TestLoadIkeaTradfriPowerMeter(t *testing.T) {
 	require.Equal(t, getGaugeVecValue(t, powerMeterPowerMetric, prometheus.Labels{"device": "szafa rack"}), 102.0)
 	require.Equal(t, getGaugeVecValue(t, powerMeterVoltageMetric, prometheus.Labels{"device": "szafa rack"}), 239.1)
 }
+
+func TestLoadIkeaTradfriPowerMeter__IgnoreOtherPayloads(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	topic := "zigbee2mqtt/szafa rack"
+	payload := "{\"current\":22222.0}"
+
+	err := processMosquittoMessage(logger, topic, payload)
+	require.NoError(t, err)
+
+	actual := getGaugeVecValue(t, powerMeterCurrentMetric, prometheus.Labels{"device": "szafa rack"})
+	require.NotEqual(t, actual, 22222.0)
+}

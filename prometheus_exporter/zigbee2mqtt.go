@@ -22,24 +22,24 @@ var lastUpdateMetric = promauto.NewGauge(prometheus.GaugeOpts{Name: "zigbee_last
 var unknownTopicMetric = promauto.NewCounterVec(prometheus.CounterOpts{Name: "zigbee_unknown_topic"}, []string{"topic"})
 
 type IkeaTradfriPowerMeter struct {
-	Current         float64 `json:"current"`
-	Energy          float64 `json:"energy"`
-	LinkQuality     int     `json:"linkquality"`
-	Power           float64 `json:"power"`
-	PowerOnBehavior string  `json:"power_on_behavior"`
-	State           string  `json:"state"`
-	Voltage         float64 `json:"voltage"`
+	Current         *float64 `json:"current"`
+	Energy          *float64 `json:"energy"`
+	LinkQuality     *int     `json:"linkquality"`
+	Power           *float64 `json:"power"`
+	PowerOnBehavior *string  `json:"power_on_behavior"`
+	State           *string  `json:"state"`
+	Voltage         *float64 `json:"voltage"`
 }
 
 func tryLoadingDeviceMetrics(logger *slog.Logger, deviceName string, payload string) {
 	var ikeaTradfriPowerMeter IkeaTradfriPowerMeter
 	err := json.Unmarshal([]byte(payload), &ikeaTradfriPowerMeter)
-	if err == nil {
+	if err == nil && ikeaTradfriPowerMeter.Power != nil && ikeaTradfriPowerMeter.Energy != nil && ikeaTradfriPowerMeter.Voltage != nil && ikeaTradfriPowerMeter.Current != nil {
 		metricLabels := prometheus.Labels{"device": deviceName}
-		powerMeterCurrentMetric.With(metricLabels).Set(ikeaTradfriPowerMeter.Current)
-		powerMeterEnergyMetric.With(metricLabels).Set(ikeaTradfriPowerMeter.Energy)
-		powerMeterPowerMetric.With(metricLabels).Set(ikeaTradfriPowerMeter.Power)
-		powerMeterVoltageMetric.With(metricLabels).Set(ikeaTradfriPowerMeter.Voltage)
+		powerMeterCurrentMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Current)
+		powerMeterEnergyMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Energy)
+		powerMeterPowerMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Power)
+		powerMeterVoltageMetric.With(metricLabels).Set(*ikeaTradfriPowerMeter.Voltage)
 		return
 	}
 
